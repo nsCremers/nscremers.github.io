@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YOUR NAME // PhD Candidate</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #ff9900;
+    --dim: #b36a00;
+    --dark: #2a1800;
+    --black: #0e0b07;
+    --white: #ffe8c8;
+    --amber: #ffe08a;
+    --red: #ff4444;
+    --border: 2px solid var(--orange);
+    --thick-border: 4px solid var(--orange);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--black);
+    color: var(--orange);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* CRT scanlines */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.18) 2px,
+      rgba(0,0,0,0.18) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* CRT vignette + flicker */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.5) 100%);
+    pointer-events: none;
+    z-index: 9998;
+    animation: flicker 8s infinite;
+  }
+
+  @keyframes flicker {
+    0%, 95%, 100% { opacity: 1; }
+    96% { opacity: 0.85; }
+    97% { opacity: 1; }
+    98% { opacity: 0.9; }
+    99% { opacity: 1; }
+  }
+
+  /* Noise texture */
+  .noise-bg {
+    position: fixed;
+    inset: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9997;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .cursor-blink::after {
+    content: '_';
+    animation: blink 0.8s step-end infinite;
+  }
+
+  /* =================== LAYOUT =================== */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* =================== HEADER =================== */
+  #site-header {
+    border-bottom: var(--thick-border);
+    position: sticky;
+    top: 0;
+    background: var(--black);
+    z-index: 100;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    border-bottom: var(--border);
+  }
+
+  .header-logo { padding: 14px 20px; }
+
+  .header-logo h1 {
+    font-family: 'VT323', monospace;
+    font-size: 2.2rem;
+    color: var(--orange);
+    text-shadow: 0 0 6px rgba(255,153,0,0.4);
+    letter-spacing: 2px;
+    line-height: 1.1;
+  }
+
+  .header-logo .subtitle {
+    font-size: 11px;
+    color: var(--amber);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  .header-clock {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    color: var(--dim);
+  }
+
+  nav { display: flex; }
+
+  nav a {
+    display: flex;
+    align-items: center;
+    padding: 10px 22px;
+    color: var(--orange);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 13px;
+    border-right: var(--border);
+    transition: background 0.1s, color 0.1s;
+  }
+
+  nav a::before {
+    content: '> ';
+    color: var(--dim);
+    margin-right: 4px;
+    transition: color 0.1s;
+  }
+
+  nav a:hover, nav a.active {
+    background: var(--orange);
+    color: var(--black);
+  }
+
+  nav a:hover::before, nav a.active::before { color: var(--black); }
+
+  /* =================== SECTIONS =================== */
+  .section { padding: 40px 0; border-bottom: var(--thick-border); }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    border: var(--border);
+  }
+
+  .section-number {
+    padding: 10px 16px;
+    background: var(--orange);
+    color: var(--black);
+    font-family: 'VT323', monospace;
+    font-size: 1.6rem;
+    border-right: var(--border);
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    padding: 10px 20px;
+    font-family: 'VT323', monospace;
+    font-size: 1.8rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    flex: 1;
+  }
+
+  .section-cmd {
+    padding: 10px 16px;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 2px;
+    border-left: var(--border);
+  }
+
+  /* =================== ABOUT =================== */
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    border: var(--border);
+  }
+
+  .hero-main {
+    padding: 30px;
+    border-right: var(--border);
+  }
+
+  .hero-sidebar {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .about-text p {
+    font-family: 'Courier Prime', monospace;
+    color: var(--white);
+    margin-bottom: 14px;
+  }
+
+  .about-text p:last-child { margin-bottom: 0; }
+
+  .tag-area {
+    margin-top: 24px;
+    border: var(--border);
+    padding: 16px;
+  }
+
+  .tag-area .label {
+    display: block;
+    font-size: 10px;
+    color: var(--amber);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .tag {
+    padding: 4px 12px;
+    border: 1px solid var(--dim);
+    font-size: 12px;
+    color: var(--orange);
+    background: var(--dark);
+    letter-spacing: 1px;
+  }
+
+  .info-block {
+    background: var(--dark);
+    border: var(--border);
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .info-block .label {
+    color: var(--amber);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .info-block a { color: var(--orange); text-decoration: none; }
+  .info-block a:hover { text-decoration: underline; color: var(--amber); }
+
+  .sidebar-btn {
+    display: block;
+    padding: 10px 14px;
+    border: var(--border);
+    color: var(--orange);
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    transition: all 0.1s;
+  }
+
+  .sidebar-btn:hover { background: var(--orange); color: var(--black); }
+
+  .sidebar-btn.amber { border-color: var(--amber); color: var(--amber); }
+  .sidebar-btn.amber:hover { background: var(--amber); color: var(--black); }
+
+  /* =================== POSTERS =================== */
+  .poster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    border-top: var(--border);
+    border-left: var(--border);
+  }
+
+  .poster-card {
+    border-right: var(--border);
+    border-bottom: var(--border);
+    background: var(--dark);
+    transition: background 0.15s;
+    overflow: hidden;
+  }
+
+  .poster-card:hover { background: rgba(255,153,0,0.06); }
+
+  .poster-img-area {
+    width: 100%;
+    height: 220px;
+    background: var(--black);
+    border-bottom: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .poster-img-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+  }
+
+  .poster-card:hover .poster-img-area img { opacity: 1; }
+
+  .poster-placeholder {
+    text-align: center;
+    color: var(--dim);
+    font-size: 12px;
+    padding: 20px;
+    pointer-events: none;
+  }
+
+  .poster-placeholder .ascii-img {
+    font-size: 36px;
+    display: block;
+    margin-bottom: 10px;
+    color: var(--dark);
+    filter: drop-shadow(0 0 4px var(--dim));
+  }
+
+  .poster-info { padding: 14px; }
+
+  .poster-title {
+    font-family: 'VT323', monospace;
+    font-size: 1.3rem;
+    color: var(--white);
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  .poster-conf { font-size: 11px; color: var(--amber); letter-spacing: 2px; margin-bottom: 4px; }
+  .poster-year { font-size: 11px; color: var(--dim); }
+
+  /* =================== MANUSCRIPTS =================== */
+  .manuscript-list { border: var(--border); }
+
+  .manuscript-item {
+    display: grid;
+    grid-template-columns: 60px 1fr auto;
+    border-bottom: var(--border);
+    transition: background 0.1s;
+  }
+
+  .manuscript-item:last-child { border-bottom: none; }
+  .manuscript-item:hover { background: rgba(255,153,0,0.04); }
+
+  .ms-num {
+    padding: 18px 16px;
+    border-right: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'VT323', monospace;
+    font-size: 1.4rem;
+    color: var(--dim);
+    background: var(--dark);
+  }
+
+  .ms-body { padding: 16px 20px; border-right: var(--border); }
+
+  .ms-title {
+    font-family: 'Courier Prime', monospace;
+    font-size: 14px;
+    color: var(--white);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .ms-authors { font-size: 12px; color: var(--dim); margin-bottom: 4px; }
+  .ms-journal { font-size: 11px; color: var(--amber); letter-spacing: 1px; }
+
+  .ms-actions {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+    justify-content: center;
+    min-width: 130px;
+  }
+
+  .ms-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+
+  .ms-badge.published  { border-color: var(--orange); color: var(--orange); }
+  .ms-badge.preprint   { border-color: var(--amber);  color: var(--amber);  }
+  .ms-badge.in-review  { border-color: var(--dim);    color: var(--dim);    }
+  .ms-badge.in-prep    { border-color: #555;          color: #555;          }
+
+  .ms-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--orange);
+    text-decoration: none;
+    padding: 3px 10px;
+    border: 1px solid var(--orange);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.1s;
+    white-space: nowrap;
+  }
+
+  .ms-link:hover { background: var(--orange); color: var(--black); }
+  .ms-link.amber { color: var(--amber); border-color: var(--amber); }
+  .ms-link.amber:hover { background: var(--amber); color: var(--black); }
+
+  /* =================== REPOS =================== */
+  .repo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    border-top: var(--border);
+    border-left: var(--border);
+  }
+
+  .repo-card {
+    border-right: var(--border);
+    border-bottom: var(--border);
+    padding: 20px;
+    position: relative;
+    transition: background 0.15s;
+  }
+
+  .repo-card:hover { background: rgba(255,153,0,0.04); }
+
+  .repo-card::before {
+    content: attr(data-lang);
+    position: absolute;
+    top: 12px; right: 14px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--amber);
+    text-transform: uppercase;
+    border: 1px solid var(--amber);
+    padding: 2px 8px;
+    opacity: 0.7;
+  }
+
+  .repo-name {
+    font-family: 'VT323', monospace;
+    font-size: 1.5rem;
+    color: var(--orange);
+    margin-bottom: 8px;
+    text-shadow: 0 0 4px rgba(255,153,0,0.3);
+    padding-right: 80px;
+  }
+
+  .repo-desc {
+    font-size: 12px;
+    color: var(--white);
+    font-family: 'Courier Prime', monospace;
+    line-height: 1.5;
+    margin-bottom: 14px;
+    opacity: 0.8;
+  }
+
+  .repo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--orange);
+    text-decoration: none;
+    border: 1px solid var(--orange);
+    padding: 4px 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.1s;
+  }
+
+  .repo-link:hover { background: var(--orange); color: var(--black); }
+
+  /* =================== FOOTER =================== */
+  footer { padding: 30px 0; }
+
+  .footer-inner {
+    border: var(--border);
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .footer-inner .copyright { font-size: 11px; color: var(--dim); letter-spacing: 2px; }
+  .footer-inner .build-info { font-size: 10px; color: #333; letter-spacing: 1px; }
+  .footer-inner .build-info span { color: var(--dim); }
+
+  /* =================== LIGHTBOX =================== */
+  .lightbox-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightbox-overlay.open { display: flex; }
+
+  .lightbox-inner { max-width: 90vw; max-height: 90vh; }
+
+  .lightbox-inner img {
+    max-width: 90vw;
+    max-height: 82vh;
+    border: var(--thick-border);
+    display: block;
+  }
+
+  .lightbox-bar {
+    border: var(--border);
+    border-top: none;
+    padding: 12px 16px;
+    background: var(--black);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .lightbox-caption { font-size: 13px; color: var(--white); }
+
+  .lightbox-close {
+    background: transparent;
+    color: var(--red);
+    border: 1px solid var(--red);
+    padding: 2px 10px;
+    font-family: 'VT323', monospace;
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: all 0.1s;
+  }
+
+  .lightbox-close:hover { background: var(--red); color: var(--black); }
+
+  /* =================== RESPONSIVE =================== */
+  @media (max-width: 760px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-main { border-right: none; border-bottom: var(--border); }
+    .manuscript-item { grid-template-columns: 40px 1fr; }
+    .ms-actions { display: none; }
+    nav a { padding: 10px 14px; font-size: 11px; }
+  }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: var(--dim); border: 1px solid var(--black); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--orange); }
+</style>
+</head>
+<body>
+
+<div class="noise-bg"></div>
+
+<!-- ===== HEADER ===== -->
+<header id="site-header">
+  <div class="header-top">
+    <div class="header-logo">
+      <!-- Edit your name and title here -->
+      <h1 class="cursor-blink">YOUR NAME</h1>
+      <div class="subtitle">PhD Candidate · Department · University</div>
+    </div>
+    <div class="header-clock" id="clock-display"></div>
+  </div>
+  <nav id="main-nav">
+    <a href="#about" class="active">About</a>
+    <a href="#posters">Posters</a>
+    <a href="#manuscripts">Papers</a>
+    <a href="#repos">Code</a>
+  </nav>
+</header>
+
+<div class="container">
+
+  <!-- ===== ABOUT ===== -->
+  <section id="about" class="section" style="padding-top: 36px;">
+    <div class="hero-grid">
+
+      <div class="hero-main">
+        <div class="about-text">
+          <!-- Edit your bio paragraphs here -->
+          <p>Welcome. I am a PhD candidate working at the intersection of [your fields]. My research focuses on [brief overview of research focus and why it matters].</p>
+          <p>Currently, I am investigating [specific project or theme]. This work sits within a broader program to understand [larger context or question].</p>
+          <p>Before my PhD, I [brief background — undergrad, industry, other degrees, etc.].</p>
+        </div>
+
+        <div class="tag-area">
+          <span class="label">// RESEARCH_INTERESTS</span>
+          <div class="tags">
+            <!-- Add or remove <div class="tag"> items here -->
+            <div class="tag">Genomics</div>
+            <div class="tag">Machine Learning</div>
+            <div class="tag">Computational Biology</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-sidebar">
+        <div class="info-block">
+          <div class="label">// INSTITUTION</div>
+          University Name<br>
+          Department of ___<br>
+          Lab: [PI Name] Lab
+        </div>
+        <div class="info-block">
+          <div class="label">// CONTACT</div>
+          <a href="mailto:you@university.edu">you@university.edu</a>
+        </div>
+        <div class="info-block">
+          <div class="label">// PROFILES</div>
+          <a href="#" class="ms-link amber" style="margin-bottom:6px; display:inline-flex;">GOOGLE SCHOLAR</a><br><br>
+          <a href="#" class="ms-link" style="display:inline-flex;">ORCID</a>
+        </div>
+        <!-- Update href to point to your CV file, e.g. href="cv.pdf" -->
+        <a href="#" class="sidebar-btn">DOWNLOAD CV [PDF]</a>
+        <a href="mailto:you@university.edu" class="sidebar-btn amber">SEND EMAIL</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== POSTERS ===== -->
+  <section id="posters" class="section">
+    <div class="section-header">
+      <div class="section-number">01</div>
+      <div class="section-title">// POSTER_PRESENTATIONS</div>
+      <div class="section-cmd">ls ./posters/</div>
+    </div>
+
+    <div class="poster-grid">
+
+      <!--
+        POSTER CARD
+        - Set the onclick image path and caption on .poster-img-area
+        - Replace the <img> src with your image file (e.g. "posters/ismb2024.jpg")
+        - To show the image, uncomment the <img> tag and remove the .poster-placeholder div
+        - Duplicate this whole block to add more posters
+      -->
+      <div class="poster-card">
+        <div class="poster-img-area" onclick="openLightbox('posters/poster1.jpg', 'Your Poster Title — ISMB 2024')">
+          <!-- <img src="posters/poster1.jpg" alt="Poster 1"> -->
+          <div class="poster-placeholder">
+            <span class="ascii-img">⬛</span>
+            <div>[ NO IMAGE YET ]</div>
+          </div>
+        </div>
+        <div class="poster-info">
+          <div class="poster-title">Your Poster Title</div>
+          <div class="poster-conf">ISMB 2024</div>
+          <div class="poster-year">2024</div>
+        </div>
+      </div>
+
+      <!-- POSTER CARD -->
+      <div class="poster-card">
+        <div class="poster-img-area" onclick="openLightbox('posters/poster2.jpg', 'Another Poster — ASHG 2023')">
+          <!-- <img src="posters/poster2.jpg" alt="Poster 2"> -->
+          <div class="poster-placeholder">
+            <span class="ascii-img">⬛</span>
+            <div>[ NO IMAGE YET ]</div>
+          </div>
+        </div>
+        <div class="poster-info">
+          <div class="poster-title">Another Poster Title</div>
+          <div class="poster-conf">ASHG 2023</div>
+          <div class="poster-year">2023</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== MANUSCRIPTS ===== -->
+  <section id="manuscripts" class="section">
+    <div class="section-header">
+      <div class="section-number">02</div>
+      <div class="section-title">// MANUSCRIPTS</div>
+      <div class="section-cmd">ls ./papers/</div>
+    </div>
+
+    <div class="manuscript-list">
+
+      <!--
+        MANUSCRIPT ITEM
+        - Edit title, authors, journal directly in the HTML
+        - Change the ms-badge class to: published / preprint / in-review / in-prep
+        - Add/remove the ms-link buttons as needed
+        - Duplicate this whole block to add more papers
+      -->
+      <div class="manuscript-item">
+        <div class="ms-num">01</div>
+        <div class="ms-body">
+          <div class="ms-title">A Computational Framework for [Your Topic]</div>
+          <div class="ms-authors">Your Name, Co-Author A, PI Name</div>
+          <div class="ms-journal">Nature Methods · 2024</div>
+        </div>
+        <div class="ms-actions">
+          <span class="ms-badge published">Published</span>
+          <a href="https://doi.org/" target="_blank" class="ms-link">PDF →</a>
+        </div>
+      </div>
+
+      <!-- MANUSCRIPT ITEM -->
+      <div class="manuscript-item">
+        <div class="ms-num">02</div>
+        <div class="ms-body">
+          <div class="ms-title">Characterizing [Biological Process] Using [Method]</div>
+          <div class="ms-authors">Your Name, Co-Author B</div>
+          <div class="ms-journal">bioRxiv · 2023</div>
+        </div>
+        <div class="ms-actions">
+          <span class="ms-badge preprint">Preprint</span>
+          <a href="https://biorxiv.org/" target="_blank" class="ms-link amber">PREPRINT</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== REPOS ===== -->
+  <section id="repos" class="section">
+    <div class="section-header">
+      <div class="section-number">03</div>
+      <div class="section-title">// CODE_REPOSITORIES</div>
+      <div class="section-cmd">ls ./repos/</div>
+    </div>
+
+    <div class="repo-grid">
+
+      <!--
+        REPO CARD
+        - Set data-lang to the primary language (shown as a badge top-right)
+        - Edit repo-name, repo-desc, and the href on repo-link
+        - Duplicate this whole block to add more repos
+      -->
+      <div class="repo-card" data-lang="Python">
+        <div class="repo-name">your-pipeline</div>
+        <div class="repo-desc">A bioinformatics pipeline for processing [data type]. Handles [input] and outputs [result].</div>
+        <a href="https://github.com/" target="_blank" class="repo-link">VIEW ON GITHUB →</a>
+      </div>
+
+      <!-- REPO CARD -->
+      <div class="repo-card" data-lang="R">
+        <div class="repo-name">analysis-toolkit</div>
+        <div class="repo-desc">Statistical analysis tools for [your field]. Includes modules for [feature A] and [feature B].</div>
+        <a href="https://github.com/" target="_blank" class="repo-link">VIEW ON GITHUB →</a>
+      </div>
+
+    </div>
+  </section>
+
+</div><!-- /container -->
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <!-- Edit copyright text here -->
+      <div class="copyright">© 2025 YOUR NAME // ALL RIGHTS RESERVED</div>
+      <div class="build-info">STATUS: <span>ACTIVE</span></div>
+    </div>
+  </div>
+</footer>
+
+<!-- ===== LIGHTBOX (no editing needed) ===== -->
+<div class="lightbox-overlay" id="lightbox" onclick="closeLightbox(event)">
+  <div class="lightbox-inner">
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-bar">
+      <div class="lightbox-caption" id="lightbox-caption"></div>
+      <button class="lightbox-close" onclick="closeLightbox()">[ X ]</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Clock
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock-display').textContent =
+      now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // Nav active state on click
+  document.querySelectorAll('nav a').forEach(link => {
+    link.addEventListener('click', () => {
+      document.querySelectorAll('nav a').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+    });
+  });
+
+  // Lightbox
+  function openLightbox(src, caption) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox-caption').textContent = caption;
+    document.getElementById('lightbox').classList.add('open');
+  }
+
+  function closeLightbox(e) {
+    if (!e || e.target === document.getElementById('lightbox')) {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('open');
+  });
+</script>
+</body>
+</html>
